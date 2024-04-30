@@ -3,7 +3,7 @@ import { config } from "dotenv";
 import mainSchema from "./main.schema";
 import mainResolvers from "./main.resolvers";
 config({ path: __dirname + "/../.env" });
-
+import "./configs/mongodb.config";
 const server = new ApolloServer({
   typeDefs: mainSchema,
   resolvers: mainResolvers,
