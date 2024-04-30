@@ -7,7 +7,6 @@ export interface IUser {
   username: string;
   email: string;
   password: string;
-  profile_pic: string;
   role: string;
   isAcceptEmail: boolean;
 }

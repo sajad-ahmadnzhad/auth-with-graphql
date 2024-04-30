@@ -5,8 +5,6 @@ export interface RegisterBody {
   email: string;
   password: string;
   confirmPassword: string;
-  national_code: string;
-  isColleague: string;
 }
 
 export interface LoginBody {

@@ -7,6 +7,9 @@ import "./configs/mongodb.config";
 const server = new ApolloServer({
   typeDefs: mainSchema,
   resolvers: mainResolvers,
+  context: ({ req, res }) => {
+    return { req, res };
+  },
 });
 
 (async () => {

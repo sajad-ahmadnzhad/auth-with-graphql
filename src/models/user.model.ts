@@ -21,10 +21,6 @@ const schema = new Schema<IUser>(
       type: String,
       required: true,
     },
-    profile_pic: {
-      type: String,
-      required: true,
-    },
     role: {
       type: String,
       enum: ["SUPER_ADMIN", "ADMIN" , 'USER'],

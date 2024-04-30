@@ -1,3 +1,2 @@
-export default [
-    `type Query {hello: String}`
-];
+import { registerSchema } from "./modules/auth/auth.schema";
+export default [registerSchema];
