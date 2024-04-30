@@ -1,11 +1,12 @@
-import { ApolloServer, gql } from "apollo-server";
+import { ApolloServer } from "apollo-server";
 import { config } from "dotenv";
-import mainSchema from './main.schema'
+import mainSchema from "./main.schema";
+import mainResolvers from "./main.resolvers";
 config({ path: __dirname + "/../.env" });
 
 const server = new ApolloServer({
-  typeDefs: mainSchema ,
-  // resolvers: {}
+  typeDefs: mainSchema,
+  resolvers: mainResolvers,
 });
 
 (async () => {
