@@ -2,6 +2,11 @@ import { gql } from "apollo-server";
 
 export const registerSchema = gql(`
 
+    interface SuccessInterface {
+        message: String!
+        statusCode: Int!
+    }
+
     input RegisterInput {
         name: String!
         username: String!
@@ -10,15 +15,21 @@ export const registerSchema = gql(`
         confirmPassword: String!
     }
 
-    type Success {
+    input LoginInput {
+        identifier: String!
+        password: String!
+    }
+
+    type Success implements SuccessInterface {
         message: String!
         statusCode: Int!
         token: String!
     }
+
     
 type Mutation {
-    register(input: RegisterInput!): Success!
-        
+    register(input: RegisterInput!): Success! 
+    login(input: LoginInput!): Success!
 }
 
 type Query {

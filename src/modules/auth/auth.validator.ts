@@ -18,10 +18,6 @@ export const registerSchemaValidator = Joi.object({
   password: Joi.string().min(8).max(30).required(),
   confirmPassword: Joi.valid(Joi.ref("password")).required(),
 });
-export const loginSchemaValidator = Joi.object({
-  identifier: Joi.string().required(),
-  password: Joi.string().required(),
-});
 export const resetPasswordSchemaValidator = Joi.object({
   password: Joi.string().min(8).max(30).required(),
   confirmPassword: Joi.valid(Joi.ref("password")).required(),

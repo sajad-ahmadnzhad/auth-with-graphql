@@ -1,4 +1,9 @@
-import { RegisterBody, RegisterOutput } from "../../typings/auth.type";
+import {
+  RegisterBody,
+  RegisterOutput,
+  LoginBody,
+  LoginOutput,
+} from "../../typings/auth.type";
 import { registerSchemaValidator } from "./auth.validator";
 import validatorMiddleware from "../../middlewares/validator.middleware";
 import userModel from "../../models/user.model";
@@ -6,6 +11,7 @@ import sendError from "../../utils/sendError.utils";
 import { AuthMessages } from "./auth.messages";
 import httpStatus from "http-status";
 import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
 import redis from "../../configs/redis.config";
 export const registerService = async (
   input: RegisterBody
@@ -20,7 +26,7 @@ export const registerService = async (
   });
 
   if (existingUser) {
-    sendError(AuthMessages.ExistingUser, "CONFLICT", httpStatus.CONFLICT);
+    throw sendError(AuthMessages.ExistingUser, "CONFLICT", httpStatus.CONFLICT);
   }
 
   const isFirstUser = await userModel.countDocuments();
@@ -57,5 +63,52 @@ export const registerService = async (
   return {
     accessToken,
     success: AuthMessages.RegisteredUserSuccess,
+  };
+};
+export const loginService = async (input: LoginBody): Promise<LoginOutput> => {
+  const { identifier, password } = input;
+  const redisClient = await redis;
+  //* Check existing User
+  const user = await userModel.findOne({
+    $or: [{ username: identifier }, { email: identifier }],
+  });
+
+  if (!user) {
+    throw sendError(AuthMessages.NotFound, "NOTFOUND", httpStatus.NOT_FOUND);
+  }
+
+  const comparePassword = bcrypt.compareSync(password, user.password);
+
+  if (!comparePassword) {
+    throw sendError(
+      AuthMessages.InvalidPassword,
+      "UNAUTHORIZED",
+      httpStatus.UNAUTHORIZED
+    );
+  }
+
+  // * Generate access token
+  const accessToken = jwt.sign(
+    { id: user._id },
+    process.env.JWT_SECRET as string,
+    {
+      expiresIn: process.env.EXPIRE_ACCESS_TOKEN,
+    }
+  );
+
+  // * Generate refresh token
+  const refreshToken = jwt.sign(
+    { id: user._id },
+    process.env.JWT_SECRET as string,
+    {
+      expiresIn: process.env.EXPIRE_REFRESH_TOKEN,
+    }
+  );
+
+  await redisClient.set(user._id.toString(), refreshToken);
+
+  return {
+    success: AuthMessages.LoginSuccess,
+    accessToken,
   };
 };
