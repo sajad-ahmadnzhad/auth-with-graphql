@@ -3,6 +3,8 @@ import {
   RegisterOutput,
   LoginBody,
   LoginOutput,
+  RefreshTokenAuthorization,
+  RefreshTokenOutput,
 } from "../../typings/auth.type";
 import { registerSchemaValidator } from "./auth.validator";
 import validatorMiddleware from "../../middlewares/validator.middleware";
@@ -50,6 +52,7 @@ export const registerService = async (
       expiresIn: process.env.EXPIRE_ACCESS_TOKEN,
     }
   );
+
   //   * Generate refresh token
   const refreshToken = jwt.sign(
     { id: user._id },
@@ -118,4 +121,55 @@ export const logoutService = async (req: Request, res: Response) => {
   res.removeHeader("Authorization");
   redisClient.del((req as any).user._id.toString());
   return { message: AuthMessages.LogoutSuccess };
+};
+export const refreshTokenService = async (
+  authorization: string | undefined
+): Promise<RefreshTokenOutput> => {
+  const accessToken = authorization?.split(" ")[1]?.trim();
+  const redisClient = await redis;
+  if (!accessToken) {
+    throw sendError(
+      AuthMessages.RequiredAccessToken,
+      "BAD_REQUEST",
+      httpStatus.BAD_REQUEST
+    );
+  }
+
+  const accessTokenPayload = jwt.decode(accessToken);
+
+  if (!accessTokenPayload || !(accessTokenPayload as any)?.id) {
+    throw sendError(
+      AuthMessages.InvalidAccessToken,
+      "BAD_REQUEST",
+      httpStatus.BAD_REQUEST
+    );
+  }
+
+  const userRefreshToken = await redisClient.get(
+    (accessTokenPayload as any).id
+  );
+
+  if (!userRefreshToken) {
+    throw sendError(
+      AuthMessages.NotFoundRefreshToken,
+      "NotFound",
+      httpStatus.NOT_FOUND
+    );
+  }
+
+  jwt.verify(userRefreshToken, process.env.JWT_SECRET as string);
+
+  // * Generate access token
+  const newAccessToken = jwt.sign(
+    { id: (accessTokenPayload as any).id },
+    process.env.JWT_SECRET as string,
+    {
+      expiresIn: process.env.EXPIRE_ACCESS_TOKEN,
+    }
+  );
+  
+  return {
+    accessToken: newAccessToken,
+    success: AuthMessages.CreatedNewAccessToken,
+  };
 };

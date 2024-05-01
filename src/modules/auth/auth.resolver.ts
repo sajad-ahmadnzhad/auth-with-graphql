@@ -1,20 +1,36 @@
 import httpStatus from "http-status";
 import { RegisterBody, LoginBody } from "../../typings/auth.type";
-import { registerService, loginService, logoutService } from "./auth.service";
+import {
+  registerService,
+  loginService,
+  logoutService,
+  refreshTokenService,
+} from "./auth.service";
 import { Request, Response } from "express";
 import authMiddleware from "../../middlewares/auth.middleware";
 export const registerResolver = {
   Query: {
-    logout: async (
+    async logout(
       _: any,
       args: any,
       { req, res }: { req: Request; res: Response }
-    ) => {
+    ) {
       await authMiddleware(req, res);
       const { message } = await logoutService(req, res);
       return {
         statusCode: httpStatus.OK,
         message,
+      };
+    },
+    async refreshToken(_: any, args: any, { req }: { req: Request }) {
+      const { accessToken, success } = await refreshTokenService(
+        req.headers.authorization
+      );
+
+      return {
+        token: accessToken,
+        message: success,
+        statusCode: httpStatus.OK,
       };
     },
   },

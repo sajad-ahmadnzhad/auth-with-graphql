@@ -18,4 +18,5 @@ export enum AuthMessages {
   AlreadyAcceptedEmail = "ایمیل شما از قبل تایید شده است",
   InvalidAccessToken = "اکسس توکن نامعتبر می باشد",
   AlreadySendEmail = "ایمیلی از قبل برای شما ارسال شده است. لطفا ایمیل تان را بررسی کنید و اگر ایمیلی دریافت نکردید 10 دقیقه دیگر اقدام به دریافت مجدد ایمیل کنید.",
+  NotFoundRefreshToken = 'رفرش توکن یافت نشد'
 }

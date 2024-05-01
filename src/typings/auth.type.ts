@@ -50,6 +50,6 @@ export interface VerifyEmailParams {
   token: string;
 }
 
-export interface RefreshTokenCookies {
-  accessToken: string;
+export interface RefreshTokenAuthorization {
+  accessToken: string | undefined;
 }

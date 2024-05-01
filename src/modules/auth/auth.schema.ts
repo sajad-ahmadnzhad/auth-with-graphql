@@ -24,6 +24,12 @@ export const registerSchema = gql`
     statusCode: Int!
   }
 
+  type RefreshTokenSuccess implements SuccessInterface {
+    message: String!
+    statusCode: Int!
+    token: String!
+  }
+
   type Success implements SuccessInterface {
     message: String!
     statusCode: Int!
@@ -36,6 +42,7 @@ export const registerSchema = gql`
   }
 
   type Query {
-    logout: LogoutSuccess
+    logout: LogoutSuccess!
+    refreshToken: RefreshTokenSuccess!
   }
 `;
