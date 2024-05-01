@@ -13,6 +13,7 @@ export const registerSchema = gql(`
     type Success {
         message: String!
         statusCode: Int!
+        token: String!
     }
     
 type Mutation {

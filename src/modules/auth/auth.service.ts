@@ -6,11 +6,13 @@ import sendError from "../../utils/sendError.utils";
 import { AuthMessages } from "./auth.messages";
 import httpStatus from "http-status";
 import jwt from "jsonwebtoken";
+import redis from "../../configs/redis.config";
 export const registerService = async (
   input: RegisterBody
 ): Promise<RegisterOutput> => {
   await validatorMiddleware(input, registerSchemaValidator);
   const { name, username, email, password } = input;
+  const redisClient = await redis;
 
   //* Check for existing user
   const existingUser = await userModel.findOne({
@@ -41,19 +43,19 @@ export const registerService = async (
       expiresIn: process.env.EXPIRE_ACCESS_TOKEN,
     }
   );
-  // * Generate refresh token
-  //   const refreshToken = jwt.sign(
-  //     { id: user._id },
-  //     process.env.JWT_SECRET as string,
-  //     {
-  //       expiresIn: process.env.EXPIRE_REFRESH_TOKEN,
-  //     }
-  //   );
+  //   * Generate refresh token
+  const refreshToken = jwt.sign(
+    { id: user._id },
+    process.env.JWT_SECRET as string,
+    {
+      expiresIn: process.env.EXPIRE_REFRESH_TOKEN,
+    }
+  );
 
-  //   await redisClient.set(user._id.toString(), refreshToken);
+  await redisClient.set(user._id.toString(), refreshToken);
 
   return {
-      accessToken,
-      success: AuthMessages.RegisteredUserSuccess
+    accessToken,
+    success: AuthMessages.RegisteredUserSuccess,
   };
 };
