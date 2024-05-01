@@ -5,6 +5,7 @@ import {
   LoginOutput,
   RefreshTokenAuthorization,
   RefreshTokenOutput,
+  ForgotPasswordBody,
 } from "../../typings/auth.type";
 import { registerSchemaValidator } from "./auth.validator";
 import validatorMiddleware from "../../middlewares/validator.middleware";
@@ -16,6 +17,9 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import redis from "../../configs/redis.config";
 import { Request, Response } from "express";
+import tokenModel from "../../models/token.model";
+import { randomBytes } from "crypto";
+import sendMail from "../../utils/sendMail.utils";
 export const registerService = async (
   input: RegisterBody
 ): Promise<RegisterOutput> => {
@@ -118,8 +122,7 @@ export const loginService = async (input: LoginBody): Promise<LoginOutput> => {
 };
 export const logoutService = async (req: Request, res: Response) => {
   const redisClient = await redis;
-  res.removeHeader("Authorization");
-  redisClient.del((req as any).user._id.toString());
+  await redisClient.del((req as any).user._id.toString());
   return { message: AuthMessages.LogoutSuccess };
 };
 export const refreshTokenService = async (
@@ -167,9 +170,44 @@ export const refreshTokenService = async (
       expiresIn: process.env.EXPIRE_ACCESS_TOKEN,
     }
   );
-  
+
   return {
     accessToken: newAccessToken,
     success: AuthMessages.CreatedNewAccessToken,
   };
+};
+export let forgotPasswordService = async (
+  input: ForgotPasswordBody
+): Promise<string> => {
+  const { email } = input;
+
+  const user = await userModel.findOne({ email });
+  if (!user) {
+    throw sendError(AuthMessages.NotFound, "NOTFOUND", httpStatus.NOT_FOUND);
+  }
+  
+  const existingToken = await tokenModel.findOne({ userId: user._id });
+  
+  if (existingToken) {
+    throw sendError(AuthMessages.AlreadySendEmail, "CONFLICT", httpStatus.CONFLICT);
+  }
+
+  const token = await tokenModel.create({
+    userId: user._id,
+    token: randomBytes(32).toString("hex"),
+  });
+
+  const mailOptions = {
+    from: process.env.GMAIL_USER as string,
+    to: email,
+    subject: "reset your password",
+    html: `<p>Link to reset your password:</p>
+      <h1>Click on the link below to reset your password</h1>
+      <h2>${process.env.BASE_URL}/v1/auth/${user._id}/reset-password/${token.token}</h2>
+       `,
+  };
+
+  sendMail(mailOptions);
+
+  return AuthMessages.SendLinkForResetPassword;
 };

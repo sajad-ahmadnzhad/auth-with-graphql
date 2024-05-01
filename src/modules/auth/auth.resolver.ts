@@ -1,10 +1,15 @@
 import httpStatus from "http-status";
-import { RegisterBody, LoginBody } from "../../typings/auth.type";
+import {
+  RegisterBody,
+  LoginBody,
+  ForgotPasswordBody,
+} from "../../typings/auth.type";
 import {
   registerService,
   loginService,
   logoutService,
   refreshTokenService,
+  forgotPasswordService,
 } from "./auth.service";
 import { Request, Response } from "express";
 import authMiddleware from "../../middlewares/auth.middleware";
@@ -50,6 +55,13 @@ export const registerResolver = {
         statusCode: httpStatus.OK,
         message: success,
         token: accessToken,
+      };
+    },
+    async forgotPassword(_: any, { input }: { input: ForgotPasswordBody }) {
+      const success = await forgotPasswordService(input);
+      return {
+        message: success,
+        statusCode: httpStatus.OK,
       };
     },
   },
