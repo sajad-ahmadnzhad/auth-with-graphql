@@ -13,6 +13,7 @@ import httpStatus from "http-status";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import redis from "../../configs/redis.config";
+import { Request, Response } from "express";
 export const registerService = async (
   input: RegisterBody
 ): Promise<RegisterOutput> => {
@@ -112,4 +113,9 @@ export const loginService = async (input: LoginBody): Promise<LoginOutput> => {
     accessToken,
   };
 };
-
+export const logoutService = async (req: Request, res: Response) => {
+  const redisClient = await redis;
+  res.removeHeader("Authorization");
+  redisClient.del((req as any).user._id.toString());
+  return { message: AuthMessages.LogoutSuccess };
+};
