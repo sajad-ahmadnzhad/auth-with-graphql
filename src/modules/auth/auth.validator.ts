@@ -19,6 +19,12 @@ export const registerSchemaValidator = Joi.object({
   confirmPassword: Joi.valid(Joi.ref("password")).required(),
 });
 export const resetPasswordSchemaValidator = Joi.object({
+  email: Joi.string()
+    .trim()
+    .regex(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/)
+    .message("Email is not valid")
+    .required(),
+  code: Joi.number().integer().required(),
   password: Joi.string().min(8).max(30).required(),
   confirmPassword: Joi.valid(Joi.ref("password")).required(),
 });

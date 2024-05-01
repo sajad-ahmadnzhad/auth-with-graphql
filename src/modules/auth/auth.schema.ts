@@ -19,6 +19,17 @@ export const registerSchema = gql`
     password: String!
   }
 
+  input ForgotPassword {
+    email: String!
+  }
+
+  input ResetPassword {
+    email: String!
+    code: Int!
+    password: String!
+    confirmPassword: String!
+  }
+
   type LogoutSuccess implements SuccessInterface {
     message: String!
     statusCode: Int!
@@ -30,11 +41,12 @@ export const registerSchema = gql`
     token: String!
   }
 
-  input ForgotPassword {
-    email: String!
+  type ForgotPasswordSuccess implements SuccessInterface {
+    message: String!
+    statusCode: Int!
   }
 
-  type ForgotPasswordSuccess implements SuccessInterface {
+  type ResetPasswordSuccess implements SuccessInterface {
     message: String!
     statusCode: Int!
   }
@@ -48,7 +60,8 @@ export const registerSchema = gql`
   type Mutation {
     register(input: RegisterInput!): Success!
     login(input: LoginInput!): Success!
-    forgotPassword(input: ForgotPassword!): ForgotPasswordSuccess
+    forgotPassword(input: ForgotPassword!): ForgotPasswordSuccess!
+    resetPassword(input: ResetPassword!): ResetPasswordSuccess!
   }
 
   type Query {

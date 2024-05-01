@@ -1,6 +1,7 @@
 import nodemailer from "nodemailer";
 import { SendMailOptions } from "../typings/auth.type";
 import tokenModel from "../models/token.model";
+import { promisify } from "util";
 
 export default async (mailOptions: SendMailOptions) => {
   const { userId, ...options } = mailOptions;

@@ -10,7 +10,7 @@ export enum AuthMessages {
   SendLinkForResetPassword = "لینک بازنشانی رمز عبور به ایمیل تان ارسال شد لطفا ایمیل تان را بررسی کنید",
   InvalidObjectId = "آبجکت آیدی نامعتبر می باشد",
   RequiredPassword = "رمز عبور اجباری می باشد و همچنین نباید کمتر از 8 رقم باشد",
-  InvalidToken = "توکن ارسال شده نامعتبر می باشد",
+  InvalidToken = "کد ارسال شده نامعتبر می باشد",
   ResetPasswordSuccess = "رمز عبور با موفقیت بازنشانی شد",
   RequiredEmail = "ایمیل اجباری می باشد",
   SendedVerifyEmail = "ایمیلی به حساب شما ارسال شده است لطفاً تأیید کنید",

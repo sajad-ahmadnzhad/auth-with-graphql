@@ -3,6 +3,7 @@ import {
   RegisterBody,
   LoginBody,
   ForgotPasswordBody,
+  ResetPasswordBody,
 } from "../../typings/auth.type";
 import {
   registerService,
@@ -10,9 +11,12 @@ import {
   logoutService,
   refreshTokenService,
   forgotPasswordService,
+  resetPasswordService,
 } from "./auth.service";
 import { Request, Response } from "express";
 import authMiddleware from "../../middlewares/auth.middleware";
+import validatorMiddleware from "../../middlewares/validator.middleware";
+import { resetPasswordSchemaValidator } from "./auth.validator";
 export const registerResolver = {
   Query: {
     async logout(
@@ -59,6 +63,15 @@ export const registerResolver = {
     },
     async forgotPassword(_: any, { input }: { input: ForgotPasswordBody }) {
       const success = await forgotPasswordService(input);
+      return {
+        message: success,
+        statusCode: httpStatus.OK,
+      };
+    },
+    async resetPassword(_: any, { input }: { input: ResetPasswordBody }) {
+      await validatorMiddleware(input, resetPasswordSchemaValidator);
+      const success = await resetPasswordService(input);
+
       return {
         message: success,
         statusCode: httpStatus.OK,

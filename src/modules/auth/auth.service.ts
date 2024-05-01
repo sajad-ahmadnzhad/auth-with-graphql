@@ -6,13 +6,14 @@ import {
   RefreshTokenAuthorization,
   RefreshTokenOutput,
   ForgotPasswordBody,
+  ResetPasswordBody,
 } from "../../typings/auth.type";
 import { registerSchemaValidator } from "./auth.validator";
 import validatorMiddleware from "../../middlewares/validator.middleware";
 import userModel from "../../models/user.model";
 import sendError from "../../utils/sendError.utils";
 import { AuthMessages } from "./auth.messages";
-import httpStatus from "http-status";
+import httpStatus, { METHOD_NOT_ALLOWED } from "http-status";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import redis from "../../configs/redis.config";
@@ -185,29 +186,65 @@ export let forgotPasswordService = async (
   if (!user) {
     throw sendError(AuthMessages.NotFound, "NOTFOUND", httpStatus.NOT_FOUND);
   }
-  
+
   const existingToken = await tokenModel.findOne({ userId: user._id });
-  
+
   if (existingToken) {
-    throw sendError(AuthMessages.AlreadySendEmail, "CONFLICT", httpStatus.CONFLICT);
+    throw sendError(
+      AuthMessages.AlreadySendEmail,
+      "CONFLICT",
+      httpStatus.CONFLICT
+    );
   }
 
-  const token = await tokenModel.create({
+  const code = Number((Math.random() * 999999).toFixed());
+
+  await tokenModel.create({
     userId: user._id,
-    token: randomBytes(32).toString("hex"),
+    code,
   });
 
   const mailOptions = {
     from: process.env.GMAIL_USER as string,
     to: email,
     subject: "reset your password",
-    html: `<p>Link to reset your password:</p>
-      <h1>Click on the link below to reset your password</h1>
-      <h2>${process.env.BASE_URL}/v1/auth/${user._id}/reset-password/${token.token}</h2>
-       `,
+    html: `<p>Code to reset your password:</p>
+      <h1>Your verification code to change your password</h1>
+      <h2>your code: ${code}</h2>`,
   };
 
   sendMail(mailOptions);
 
   return AuthMessages.SendLinkForResetPassword;
+};
+export let resetPasswordService = async (
+  input: ResetPasswordBody
+): Promise<string> => {
+  const { email, code, password } = input;
+
+  const user = await userModel.findOne({ email });
+
+  if (!user) {
+    throw sendError(AuthMessages.NotFound, "NOTFOUND", httpStatus.NOT_FOUND);
+  }
+
+  const userToken = await tokenModel.findOne({ userId: user._id, code });
+
+  if (!userToken) {
+    throw sendError(
+      AuthMessages.InvalidToken,
+      "BAD_REQUEST",
+      httpStatus.BAD_REQUEST
+    );
+  }
+
+  const hashPassword = bcrypt.hashSync(password, 10);
+
+  await user.updateOne({
+    password: hashPassword,
+  });
+
+  await userToken.deleteOne();
+
+  return AuthMessages.ResetPasswordSuccess;
 };

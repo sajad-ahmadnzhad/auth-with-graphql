@@ -8,7 +8,7 @@ const schema = new Schema(
       required: true,
       unique: true,
     },
-    token: { type: String, required: true },
+    code: { type: String, required: true },
     createdAt: { type: Date, expires: "10m", default: Date.now },
   },
   { versionKey: false }

@@ -23,13 +23,11 @@ export interface SendMailOptions {
   userId?: Schema.Types.ObjectId;
 }
 
-export interface ResetPasswordParams {
-  id: string;
-  token: string;
-}
-
 export interface ResetPasswordBody {
+  email: string;
+  code: string;
   password: string;
+  confirmPassword: string;
 }
 
 export interface RegisterOutput {
