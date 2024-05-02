@@ -3,24 +3,25 @@ import {
   RegisterOutput,
   LoginBody,
   LoginOutput,
-  RefreshTokenAuthorization,
   RefreshTokenOutput,
   ForgotPasswordBody,
   ResetPasswordBody,
+  SendVerifyEmailBody,
+  VerifyEmailBody,
 } from "../../typings/auth.type";
 import { registerSchemaValidator } from "./auth.validator";
 import validatorMiddleware from "../../middlewares/validator.middleware";
 import userModel from "../../models/user.model";
 import sendError from "../../utils/sendError.utils";
 import { AuthMessages } from "./auth.messages";
-import httpStatus, { METHOD_NOT_ALLOWED } from "http-status";
+import httpStatus from "http-status";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import redis from "../../configs/redis.config";
 import { Request, Response } from "express";
 import tokenModel from "../../models/token.model";
-import { randomBytes } from "crypto";
 import sendMail from "../../utils/sendMail.utils";
+import sendMailUtils from "../../utils/sendMail.utils";
 export const registerService = async (
   input: RegisterBody
 ): Promise<RegisterOutput> => {
@@ -121,7 +122,7 @@ export const loginService = async (input: LoginBody): Promise<LoginOutput> => {
     accessToken,
   };
 };
-export const logoutService = async (req: Request, res: Response) => {
+export const logoutService = async (req: Request) => {
   const redisClient = await redis;
   await redisClient.del((req as any).user._id.toString());
   return { message: AuthMessages.LogoutSuccess };
@@ -247,4 +248,89 @@ export let resetPasswordService = async (
   await userToken.deleteOne();
 
   return AuthMessages.ResetPasswordSuccess;
+};
+export const sendVerifyEmailService = async (
+  input: SendVerifyEmailBody
+): Promise<string> => {
+  const { email } = input;
+
+  const user = await userModel.findOne({ email });
+
+  if (!user) {
+    throw sendError(AuthMessages.NotFound, "NOTFOUND", httpStatus.NOT_FOUND);
+  }
+
+  if (user.isAcceptEmail) {
+    throw sendError(
+      AuthMessages.AlreadyAcceptedEmail,
+      "BAD_REQUEST",
+      httpStatus.BAD_REQUEST
+    );
+  }
+
+  const existingToken = await tokenModel.findOne({ userId: user._id });
+
+  if (existingToken) {
+    throw sendError(
+      AuthMessages.AlreadySendEmail,
+      "CONFLICT",
+      httpStatus.CONFLICT
+    );
+  }
+  const code = Number((Math.random() * 999999).toFixed());
+  await tokenModel.create({
+    userId: user._id,
+    code,
+  });
+
+  const mailOptions = {
+    from: process.env.GMAIL_USER as string,
+    to: email,
+    subject: "Email confirmation",
+    html: `<p>Your email verification code:</p>
+       <h1>your code: ${code}</h1>
+       `,
+    userId: user._id,
+  };
+
+  await sendMailUtils(mailOptions);
+
+  return AuthMessages.SendedVerifyEmail;
+};
+export const verifyEmailService = async (
+  input: VerifyEmailBody
+): Promise<string> => {
+  const { email, code } = input;
+
+  const user = await userModel.findOne({ email });
+
+  if (!user) {
+    throw sendError(AuthMessages.NotFound, "NOTFOUND", httpStatus.NOT_FOUND);
+  }
+
+  if (user.isAcceptEmail) {
+    throw sendError(
+      AuthMessages.AlreadyAcceptedEmail,
+      "CONFLICT",
+      httpStatus.CONFLICT
+    );
+  }
+
+  const userToken = await tokenModel.findOne({
+    userId: user._id,
+    code,
+  });
+
+  if (!userToken) {
+    throw sendError(
+      AuthMessages.InvalidToken,
+      "BAD_REQUEST",
+      httpStatus.BAD_REQUEST
+    );
+  }
+
+  await user.updateOne({ isAcceptEmail: true });
+  await userToken.deleteOne();
+
+  return AuthMessages.VerifyEmailSuccess;
 };

@@ -4,6 +4,8 @@ import {
   LoginBody,
   ForgotPasswordBody,
   ResetPasswordBody,
+  SendVerifyEmailBody,
+  VerifyEmailBody,
 } from "../../typings/auth.type";
 import {
   registerService,
@@ -12,6 +14,8 @@ import {
   refreshTokenService,
   forgotPasswordService,
   resetPasswordService,
+  sendVerifyEmailService,
+  verifyEmailService,
 } from "./auth.service";
 import { Request, Response } from "express";
 import authMiddleware from "../../middlewares/auth.middleware";
@@ -25,7 +29,7 @@ export const registerResolver = {
       { req, res }: { req: Request; res: Response }
     ) {
       await authMiddleware(req, res);
-      const { message } = await logoutService(req, res);
+      const { message } = await logoutService(req);
       return {
         statusCode: httpStatus.OK,
         message,
@@ -75,6 +79,20 @@ export const registerResolver = {
       return {
         message: success,
         statusCode: httpStatus.OK,
+      };
+    },
+    async sendVerifyEmail(_: any, { input }: { input: SendVerifyEmailBody }) {
+      const success = await sendVerifyEmailService(input);
+      return {
+        statusCode: httpStatus.OK,
+        message: success,
+      };
+    },
+    async verifyEmail(_: any, { input }: { input: VerifyEmailBody }) {
+      const success = await verifyEmailService(input);
+      return {
+        statusCode: httpStatus.OK,
+        message: success,
       };
     },
   },

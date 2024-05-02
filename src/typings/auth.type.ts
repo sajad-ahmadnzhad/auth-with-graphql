@@ -25,7 +25,7 @@ export interface SendMailOptions {
 
 export interface ResetPasswordBody {
   email: string;
-  code: string;
+  code: number;
   password: string;
   confirmPassword: string;
 }
@@ -43,11 +43,7 @@ export interface SendVerifyEmailBody {
   email: string;
 }
 
-export interface VerifyEmailParams {
-  id: string;
-  token: string;
-}
-
-export interface RefreshTokenAuthorization {
-  accessToken: string | undefined;
+export interface VerifyEmailBody {
+  email: string
+  code: number
 }

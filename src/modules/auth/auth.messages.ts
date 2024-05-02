@@ -13,7 +13,7 @@ export enum AuthMessages {
   InvalidToken = "کد ارسال شده نامعتبر می باشد",
   ResetPasswordSuccess = "رمز عبور با موفقیت بازنشانی شد",
   RequiredEmail = "ایمیل اجباری می باشد",
-  SendedVerifyEmail = "ایمیلی به حساب شما ارسال شده است لطفاً تأیید کنید",
+  SendedVerifyEmail = "ایمیلی به حساب شما ارسال شده است لطفاً بررسی کنید",
   VerifyEmailSuccess = "ایمیل شما با موفقیت تایید شد",
   AlreadyAcceptedEmail = "ایمیل شما از قبل تایید شده است",
   InvalidAccessToken = "اکسس توکن نامعتبر می باشد",
