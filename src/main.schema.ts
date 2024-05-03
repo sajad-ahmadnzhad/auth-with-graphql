@@ -1,2 +1,2 @@
-import { registerSchema } from "./modules/auth/auth.schema";
-export default [registerSchema];
+import authSchema from "./modules/auth/auth.schema";
+export default [authSchema];

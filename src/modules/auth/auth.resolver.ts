@@ -21,7 +21,7 @@ import { Request, Response } from "express";
 import authMiddleware from "../../middlewares/auth.middleware";
 import validatorMiddleware from "../../middlewares/validator.middleware";
 import { resetPasswordSchemaValidator } from "./auth.validator";
-export const registerResolver = {
+export default {
   Query: {
     async logout(
       _: any,

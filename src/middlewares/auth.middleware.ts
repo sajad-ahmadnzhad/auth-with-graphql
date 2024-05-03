@@ -7,7 +7,7 @@ import jwt from "jsonwebtoken";
 
 export default async (req: Request, res: Response) => {
   const { authorization } = req.headers;
-  const accessToken = authorization?.split(" ")[1]?.trim();
+  const accessToken = authorization?.split("Bearer ")[1]?.trim();
 
   if (!accessToken) {
     throw sendError(

@@ -1,3 +1,3 @@
-import { registerResolver } from "./modules/auth/auth.resolver";
+import authResolver from "./modules/auth/auth.resolver";
 
-export default [registerResolver];
+export default [authResolver];

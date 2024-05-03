@@ -1,6 +1,6 @@
 import { gql } from "apollo-server";
 
-export const registerSchema = gql`
+export default gql`
   interface SuccessInterface {
     message: String!
     statusCode: Int!
