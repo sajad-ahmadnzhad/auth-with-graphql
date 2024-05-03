@@ -1,2 +1,4 @@
 import authSchema from "./modules/auth/auth.schema";
-export default [authSchema];
+import userSchema from "./modules/user/user.schema";
+
+export default [authSchema, userSchema];
