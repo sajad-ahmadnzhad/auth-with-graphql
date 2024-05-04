@@ -19,11 +19,24 @@ export default gql`
     statusCode: Int!
   }
 
+  input UpdateUserInput {
+    name: String!
+    username: String!
+    email: String!
+    password: String!
+  }
+
+  type UpdateUserSuccess implements SuccessInterface {
+    message: String!
+    statusCode: Int!
+  }
+
   type Query {
     myAccount: User!
   }
 
   type Mutation {
     deleteAccount(input: DeleteAccountInput!): DeleteAccountSuccess!
+    updateUser(input: UpdateUserInput!): UpdateUserSuccess!
   }
 `;
