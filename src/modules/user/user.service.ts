@@ -6,6 +6,7 @@ import sendError from "../../utils/sendError.utils";
 import { UserMessages } from "./user.message";
 import httpStatus from "http-status";
 import redis from "../../configs/redis.config";
+import { isValidObjectId } from "mongoose";
 
 export const deleteAccountService = async (
   input: DeleteAccountBody,
@@ -30,7 +31,10 @@ export const deleteAccountService = async (
 
   return UserMessages.DeleteAccountSuccess;
 };
-export const updateService = async (input: UpdateBody, req: Request) => {
+export const updateService = async (
+  input: UpdateBody,
+  req: Request
+): Promise<string> => {
   const { user } = req as any;
   const redisClient = await redis;
   const foundUser = await userModel.findOne({
@@ -61,4 +65,44 @@ export const updateService = async (input: UpdateBody, req: Request) => {
   });
 
   return UserMessages.UpdatedUserSuccess;
+};
+export const removeService = async (
+  userId: string,
+  req: Request
+): Promise<string> => {
+  const admin = (req as any).user;
+
+  if (!isValidObjectId(userId)) {
+    throw sendError(
+      UserMessages.NotMongodbId,
+      "BAD_REQUEST",
+      httpStatus.BAD_REQUEST
+    );
+  }
+
+  const user = await userModel.findById(userId);
+
+  if (!user) {
+    throw sendError(UserMessages.NotFound, "NOTFOUND", httpStatus.NOT_FOUND);
+  }
+
+  if (user.role == "ADMIN" && admin.role !== "SUPER_ADMIN") {
+    throw sendError(
+      UserMessages.CannotRemoveAdmin,
+      "FORBIDDEN",
+      httpStatus.FORBIDDEN
+    );
+  }
+
+  if (user.role == "SUPER_ADMIN") {
+    throw sendError(
+      UserMessages.CannotRemoveSuperAdmin,
+      "FORBIDDEN",
+      httpStatus.FORBIDDEN
+    );
+  }
+
+  await user.deleteOne();
+
+  return UserMessages.RemovedUser;
 };

@@ -1,10 +1,15 @@
 import { Request, Response } from "express";
 import authMiddleware from "../../middlewares/auth.middleware";
 import { DeleteAccountBody, UpdateBody } from "../../typings/user.type";
-import { deleteAccountService, updateService } from "./user.service";
+import {
+  deleteAccountService,
+  removeService,
+  updateService,
+} from "./user.service";
 import httpStatus from "http-status";
 import validatorMiddleware from "../../middlewares/validator.middleware";
 import { updateSchemaValidator } from "./user.validator";
+import isAdminMiddleware from "../../middlewares/isAdmin.middleware";
 
 export default {
   Query: {
@@ -42,6 +47,20 @@ export default {
       await validatorMiddleware(input, updateSchemaValidator);
 
       const success = await updateService(input, req);
+
+      return {
+        message: success,
+        statusCode: httpStatus.OK,
+      };
+    },
+    removeUser: async (
+      _: any,
+      { userId }: { userId: string },
+      { req, res }: { req: Request; res: Response }
+    ) => {
+      await authMiddleware(req, res);
+      isAdminMiddleware(req);
+      const success = await removeService(userId, req);
 
       return {
         message: success,

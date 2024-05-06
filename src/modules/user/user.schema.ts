@@ -31,6 +31,11 @@ export default gql`
     statusCode: Int!
   }
 
+  type RemoveUser implements SuccessInterface {
+    message: String!
+    statusCode: Int!
+  }
+
   type Query {
     myAccount: User!
   }
@@ -38,5 +43,6 @@ export default gql`
   type Mutation {
     deleteAccount(input: DeleteAccountInput!): DeleteAccountSuccess!
     updateUser(input: UpdateUserInput!): UpdateUserSuccess!
+    removeUser(userId: ID!): RemoveUser!
   }
 `;
