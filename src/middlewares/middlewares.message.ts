@@ -4,9 +4,6 @@ export enum MiddlewaresMessages {
   NotFoundUser = "کاربری پیدا نشد",
   RequiredAcceptEmail = "لطفا ایمیل خود را تایید کنید تا بتوانید به این مسیر دسترسی داشته باشید",
 
-  //Error middleware
-  InternalServerError = "خطایی در سمت سرور رخ داد !!",
-
-  // Not found middleware
-  NotFoundPage = "صفحه مورد نظر یافت نشد !!",
+  //IsAdmin middleware
+  PathOfAdmins = 'فقط مدیران می توانند به این مسیر دسترسی داشته باشند'
 }

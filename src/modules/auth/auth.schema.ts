@@ -80,8 +80,8 @@ export default gql`
     login(input: LoginInput!): Success!
     forgotPassword(input: ForgotPassword!): ForgotPasswordSuccess!
     resetPassword(input: ResetPassword!): ResetPasswordSuccess!
-    sendVerifyEmail(input: SendVerifyEmail!): SendVerifyEmailSuccess
-    verifyEmail(input: VerifyEmail!): VerifyEmailSuccess
+    sendVerifyEmail(input: SendVerifyEmail!): SendVerifyEmailSuccess!
+    verifyEmail(input: VerifyEmail!): VerifyEmailSuccess!
   }
 
   type Query {

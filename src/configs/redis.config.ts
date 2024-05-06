@@ -5,6 +5,7 @@ const redisUri = productionMode ? undefined : process.env.REDIS_URI;
 
 export default (async () => {
   return await createClient({ url: redisUri })
-    .on("error", (error) => console.log("connect to redis error => ", error))
+  .on("error", (error) => console.log("connect to redis error => ", error))
+  .on("connect", () => console.log("Redis db connected successfully"))
     .connect();
 })();
